@@ -1,0 +1,120 @@
+erdiagram RCModelsDatabase
+notation=crowsfoot
+
+// Entities
+entity Customer {
+    customer_id: INTEGER key
+    first_name: VARCHAR(50)
+    last_name: VARCHAR(50)
+    email: VARCHAR(100)
+    phone: VARCHAR(20)
+    address: TEXT
+}
+
+entity Manufacturer {
+    manufacturer_id: INTEGER key
+    name: VARCHAR(100)
+    website: VARCHAR(255)
+}
+
+entity Product {
+    model_id: VARCHAR(50) key
+    manufacturer_id: INTEGER
+    model_name: VARCHAR(100)
+    scale: VARCHAR(20)
+    minimum_stock: INTEGER
+}
+
+entity Inventory {
+    model_id: VARCHAR(50) key
+    decal_id: VARCHAR(50) key
+    on_hand: INTEGER
+}
+
+entity ShoppingCart {
+    cart_id: INTEGER key
+    customer_id: INTEGER
+    created_date: DATETIME
+    status: VARCHAR(20)
+}
+
+entity CartItems {
+    cart_id: INTEGER key
+    model_id: VARCHAR(50) key
+    decal_id: VARCHAR(50) key
+    quantity: INTEGER
+}
+
+entity Invoice {
+    invoice_id: INTEGER key
+    customer_id: INTEGER
+    cart_id: INTEGER
+    invoice_date: DATETIME
+    total_amount: DECIMAL(10,2)
+}
+
+entity BackOrder {
+    order_id: INTEGER key
+    customer_id: INTEGER
+    cart_id: INTEGER
+    model_id: VARCHAR(50)
+    decal_id: VARCHAR(50)
+    quantity: INTEGER
+    order_date: DATETIME
+    status: VARCHAR(20)
+}
+
+entity Prospect {
+    prospect_id: INTEGER key
+    first_name: VARCHAR(50)
+    last_name: VARCHAR(50)
+    email: VARCHAR(100)
+    subscription_source: VARCHAR(100)
+    date_added: DATETIME
+}
+
+// Relationships with business rules
+
+// Customer & Invoice rules
+relationship CustomerInvoice {
+    Customer[1 | "customer"] -> Invoice[0..N | "invoices"]
+}
+
+// Customer & Shopping Cart rules
+relationship CustomerShoppingCart {
+    Customer[1 | "customer"] -> ShoppingCart[0..1 | "cart"]
+}
+
+// Shopping Cart & Invoice rules
+relationship ShoppingCartInvoice {
+    ShoppingCart[1 | "cart"] -> Invoice[0..1 | "invoice"]
+}
+
+// Shopping Cart & Backorder rules
+relationship ShoppingCartBackOrder {
+    ShoppingCart[1 | "cart"] -> BackOrder[0..N | "backorders"]
+}
+
+// Product & Manufacturer rules
+relationship ManufacturerProduct {
+    Manufacturer[1 | "manufacturer"] -> Product[0..N | "products"]
+}
+
+// Product & Inventory rules
+relationship ProductInventory {
+    Product[1 | "product"] -> Inventory[1..N | "inventory"]
+}
+
+// Cart Items relationships
+relationship CartItemsInventory {
+    CartItems[0..N | "cart_items"] -> Inventory[1 | "inventory"]
+}
+
+relationship ShoppingCartItems {
+    ShoppingCart[1 | "cart"] -> CartItems[0..N | "items"]
+}
+
+// Prospect to Customer conversion
+relationship ProspectCustomer {
+    Prospect[0..1 | "prospect"] -> Customer[0..1 | "customer"]
+}
